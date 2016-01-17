@@ -92,6 +92,8 @@ app.controller("myCtrl", function($scope, $interval, $timeout, localStorageServi
 				item.moneyAll = moneyAll;
 			};
 			$scope.localStorageSet(Key, $scope.items);
+
+			$scope.timeOnTimer = '00:00:00';
 		};
 
  	};
