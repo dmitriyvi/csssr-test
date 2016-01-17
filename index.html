@@ -25,12 +25,14 @@ var app = angular.module("myApp", ['LocalStorageModule']);
 app.service('myService', function( localStorageService ){
 	var items = []; 
 
-	this.localStorageSet = function(Key, task) { // Сохранение задачи в  локальное хранилище
+	// Сохранение задачи в  локальное хранилище
+	this.localStorageSet = function(Key, task) { 
  		var Val = [];
- 		if(task.length > 0){ // Если список задачи не пуст, тогда просто обновялем информацию
+
+ 		if(task.length){ 
  			Val = task;
  			localStorageService.set(Key, Val);
- 		}else{ 								// Если список задачи пуст, тогда пушим.
+ 		}else{ 								
  			Val.push(task);
  			localStorageService.set(Key, Val);
  		}
@@ -38,7 +40,8 @@ app.service('myService', function( localStorageService ){
  		this.localStorageGet(Key);  
  	};
 
- 	this.localStorageGet = function(Key) { // Выгурузка задачи с локального хранилища
+ 	// Выгурузка задачи с локального хранилища
+ 	this.localStorageGet = function(Key) { 
   	items = localStorageService.get(Key);
   	return items;
   }
@@ -47,22 +50,31 @@ app.service('myService', function( localStorageService ){
 
 ///////////////////////////////////////////CONTROLLER////////////////////////////////////////////////
 app.controller("myCtrl", function($scope, $interval, $timeout, myService) {
- 	Key = 'items'; // Ключ в локальном хранилище
+
+	// Ключ в локальном хранилище
+ 	Key = 'items'; 
+
+ 	// Инницируем пустой список
  	$scope.items = []; 
+
+ 	// Помещаем в скоуп стандартное значение счетчика времени
  	$scope.timeOnTimer = '00:00:00';
+
+ 	// Помещаем в скоуп стандартное значение накопленного времени
  	$scope.timeOnTimerSum = '00:00:00';
 
- 	$scope.addNewTask = function(task) { // Добавление новой задачи
- 		if(!task){  // Если спиок задачи пуст, тогда присваевем "нулевые" значения
+ 	// Добавление новой задачи
+ 	$scope.addNewTask = function(task) { 
+ 		if(!task){  
 	 		var taskName = ' ';
 	 		var money = 0;
-	 	}else{			// Если список задачи не пуст, присваем полученные с формы значения
+	 	}else{			
 	 		var taskName = task.name;
 	 		var money = task.money;
 	 	}
  		
  		$scope.items = {
-	 		'timeAll' : $scope.timeOnTimerSum,
+	 		'timeAll' : '00:00:00',
 	 		'moneyAll' : 0,
 	 		'task' : {
 	 			'name': taskName,
@@ -72,10 +84,13 @@ app.controller("myCtrl", function($scope, $interval, $timeout, myService) {
 
  		myService.localStorageSet(Key, $scope.items);
  		$scope.items = myService.localStorageGet(Key);
- 		$scope.task = []; // Очищаем форму постановки задачи
+
+ 		// Очищаем  список значений формы постановки задачи
+ 		$scope.task = []; 
  	};
 
- 	$scope.startTimeCounter = function() { // Запуск счетчика времени
+ 	// Запуск счетчика времени
+ 	$scope.startTimeCounter = function() { 
  		$scope.startSwitch = true;
 
 		var timer = 0;
@@ -93,28 +108,36 @@ app.controller("myCtrl", function($scope, $interval, $timeout, myService) {
 		  $scope.timeOnTimer = hour + ':' + minute + ':' + second;
 		}, 1000);
 
-		$scope.stopTimeCounter = function() { // Остановка счетчика времени
+		// Остановка счетчика времени
+		$scope.stopTimeCounter = function() { 
 			$interval.cancel(incrementCounter);
-			$scope.getSummTime($scope.timeOnTimer); // Получение "общего времени на выполнение задачи"
+
+			// Получение "общего времени на выполнение задачи"
+			$scope.getSummTime($scope.timeOnTimer); 
 			$scope.startSwitch = false;
 
 			var items = $scope.items;
 			var timeAll = $scope.timeOnTimerSum;
-			var moneyAll = $scope.getAllMoneySumm(); // Получение "суммы за время потраченное на выполнение задачи"
+
+			// Получение "суммы за время потраченное на выполнение задачи"
+			var moneyAll = $scope.getAllMoneySumm(); 
 
 			for (var i = 0; i < items.length; i++) {
 				item = items[i]; 
 				item.timeAll = timeAll;
 				item.moneyAll = moneyAll;
 			};
-			myService.localStorageSet(Key, $scope.items); // Сохранение результата
+
+			// Сохранение результата
+			myService.localStorageSet(Key, $scope.items); 
 
 			$scope.timeOnTimer = '00:00:00';
 		};
 
  	};
 
- 	$scope.getSummTime = function(time) { // Суммирование времени потраченого сейчас с временем потраченым до.
+ 	// Суммирование времени потраченого сейчас с временем потраченым до.
+ 	$scope.getSummTime = function(time) { 
  		var items = $scope.items;
  		var sumTime = '';
  		if(items){
@@ -141,14 +164,16 @@ app.controller("myCtrl", function($scope, $interval, $timeout, myService) {
 		$scope.timeOnTimerSum = hour + ':' + minute + ':' + second;
  	}; 
 
- 	$scope.getAllMoneySumm = function() { // Получить сумму денег полученую за отработаное время
+ 	// Получить сумму денег полученую за отработаное время
+ 	$scope.getAllMoneySumm = function() { 
  		var moneyInHour = $scope.items[0].task.money;
  		var sumTime = $scope.timeOnTimerSum.split(/:/);
  		var summAll = (parseInt(sumTime[0]) * parseInt(moneyInHour)) + (parseInt(moneyInHour) / 60 * parseInt(sumTime[1]));
  		return summAll.toFixed(2);
  	};
 
- 	$scope.changeTask = function(item) { // Редактирование поставленной задачи
+ 	// Редактирование поставленной задачи
+ 	$scope.changeTask = function(item) { 
  		myService.localStorageSet(Key, item);
  		$scope.items = myService.localStorageGet(Key);
  	};
