@@ -3,7 +3,8 @@
 <head>
 	<meta charset="UTF-8"> 
 	<title>Document</title>
-
+		
+	<link rel="stylesheet" href="css/style.css">
 	<!-- Latest compiled and minified CSS -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 	<!-- Optional theme -->
@@ -11,43 +12,57 @@
 
 	<!-- scripts -->
 	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
-	<script src="dist/angular-local-storage.js"></script>
+	<script src="scripts/angular-local-storage.js"></script>
 	<!-- scripts end -->
 
 </head>
 <body>
-<style>
-  ul {
-  	padding:0;
-  }
- 	ul li {
- 		list-style: none;
- 		padding-bottom: 10px;
- 		padding-top: 10px;
- 	}
-</style>
 
 <script>
-
 var app = angular.module("myApp", ['LocalStorageModule']);
 
-app.controller("myCtrl", function($scope, $interval, $timeout, localStorageService) {
+///////////////////////////////////////////SERVICE////////////////////////////////////////////////
+app.service('myService', function( localStorageService ){
+
+	var items = []; 
+
+	this.localStorageSet = function(Key, task) { // Сохранение задачи в  локальное хранилище
+ 		var Val = [];
+ 		if(task.length > 0){ // Если список задачи не пуст, тогда просто обновялем информацию
+ 			Val = task;
+ 			localStorageService.set(Key, Val);
+ 		}else{ 								// Если список задачи пуст, тогда пушим.
+ 			Val.push(task);
+ 			localStorageService.set(Key, Val);
+ 		}
+
+ 		this.localStorageGet(Key);  
+ 	};
+
+ 	this.localStorageGet = function(Key) { // Выгурузка задачи с локального хранилища
+  	items = localStorageService.get(Key);
+  	return items;
+  }
+
+});
+
+///////////////////////////////////////////CONTROLLER////////////////////////////////////////////////
+app.controller("myCtrl", function($scope, $interval, $timeout, myService) {
  	Key = 'items'; // Ключ в локальном хранилище
- 	$scope.tasks = [];
- 	$scope.items = [];
+ 	$scope.items = []; 
  	$scope.timeOnTimer = '00:00:00';
  	$scope.timeOnTimerSum = '00:00:00';
 
  	$scope.addNewTask = function(task) { // Добавление новой задачи
- 		if(!task){
+ 		if(!task){  // Если спиок задачи пуст, тогда присваевем "нулевые" значения
 	 		var taskName = ' ';
 	 		var money = 0;
-	 	}else{
+	 	}else{			// Если список задачи не пуст, присваем полученные с формы значения
 	 		var taskName = task.name;
 	 		var money = task.money;
 	 	}
  		
- 		$scope.tasks = {
+ 		$scope.items = {
 	 		'timeAll' : $scope.timeOnTimerSum,
 	 		'moneyAll' : 0,
 	 		'task' : {
@@ -56,7 +71,9 @@ app.controller("myCtrl", function($scope, $interval, $timeout, localStorageServi
  			}
  		}
 
- 		$scope.localStorageSet(Key, $scope.tasks);
+ 		myService.localStorageSet(Key, $scope.items);
+ 		$scope.items = myService.localStorageGet(Key);
+ 		$scope.task = []; // Очищаем форму постановки задачи
  	};
 
  	$scope.startTimeCounter = function() { // Запуск счетчика времени
@@ -79,19 +96,21 @@ app.controller("myCtrl", function($scope, $interval, $timeout, localStorageServi
 
 		$scope.stopTimeCounter = function() { // Остановка счетчика времени
 			$interval.cancel(incrementCounter);
-			$scope.summTime($scope.timeOnTimer);
+			$scope.summTime($scope.timeOnTimer); // Получение "общего времени на выполнение задачи"
 			$scope.startSwitch = false;
 
 			var items = $scope.items;
 			var timeAll = $scope.timeOnTimerSum;
-			var moneyAll = $scope.getAllMoneySumm();
+			var moneyAll = $scope.getAllMoneySumm(); // Получение "суммы за время потраченное на выполнение задачи"
 
 			for (var i = 0; i < items.length; i++) {
 				item = items[i]; 
 				item.timeAll = timeAll;
 				item.moneyAll = moneyAll;
 			};
-			$scope.localStorageSet(Key, $scope.items);
+			myService.localStorageSet(Key, $scope.items); // Сохранение результата
+
+			$scope.timeOnTimer = '00:00:00';
 		};
 
  	};
@@ -124,30 +143,11 @@ app.controller("myCtrl", function($scope, $interval, $timeout, localStorageServi
  	};
 
  	$scope.changeTask = function(item) { // Редактирование поставленной задачи
- 		$scope.localStorageSet(Key, item);
+ 		myService.localStorageSet(Key, item);
+ 		$scope.items = myService.localStorageGet(Key);
  	};
 
- 	$scope.localStorageSet = function(Key, tasks) { // Сохранение задачи в  локальное хранилище
- 		var Val = [];
- 		if(tasks.length > 0){
- 			Val = tasks;
- 			localStorageService.set(Key, Val);
- 		}else{
- 			Val.push(tasks);
- 			localStorageService.set(Key, Val);
- 		}
-
- 		$scope.localStorageGet(Key);
- 	};
-
- 	$scope.localStorageGet = function(Key) { // Выгурузка задачи с локального хранилища
-  	$scope.items = localStorageService.get(Key);
-  	console.log('localStorageGet ' + $scope.items);
-  	return $scope.items;
-  }
-
-  $scope.localStorageGet(Key);
-
+  $scope.items = myService.localStorageGet(Key);
 });
  
 </script>
@@ -157,7 +157,7 @@ app.controller("myCtrl", function($scope, $interval, $timeout, localStorageServi
 	<div class="container">
 		<div class="row">
 			<div class="col-md-3 ">
-				<p class="lead">Add new Task!</p>
+				<p class="lead">Set Task!</p>
 	 			<div class="main-left-b">
 	 				<form class="form-horizontal">
 						  <div class="form-group">
@@ -181,7 +181,7 @@ app.controller("myCtrl", function($scope, $interval, $timeout, localStorageServi
 			<div class="col-md-3"></div>
 
 			<div class="col-md-6 ">
-				<p class="lead">Task list</p>
+				<p class="lead">Task info list</p>
 	 			<ul>
 	 				<li ng-show="!items">Task list is empty!</li>
 	 				<li ng-repeat="item in items"> 
