@@ -71,15 +71,9 @@ app.controller("myCtrl", function($scope, $interval, $timeout, myService) {
  			}
  		}
 
-<<<<<<< HEAD
  		myService.localStorageSet(Key, $scope.items);
  		$scope.items = myService.localStorageGet(Key);
  		$scope.task = []; // Очищаем форму постановки задачи
-=======
- 		$scope.localStorageSet(Key, $scope.tasks);
- 		$scope.task = [];
-
->>>>>>> 1b732a076399bc66f2224760c640989bc304a49b
  	};
 
  	$scope.startTimeCounter = function() { // Запуск счетчика времени
@@ -114,11 +108,7 @@ app.controller("myCtrl", function($scope, $interval, $timeout, myService) {
 				item.timeAll = timeAll;
 				item.moneyAll = moneyAll;
 			};
-<<<<<<< HEAD
 			myService.localStorageSet(Key, $scope.items); // Сохранение результата
-=======
-			$scope.localStorageSet(Key, $scope.items); // Сохранение результата
->>>>>>> 1b732a076399bc66f2224760c640989bc304a49b
 
 			$scope.timeOnTimer = '00:00:00';
 		};
@@ -157,31 +147,7 @@ app.controller("myCtrl", function($scope, $interval, $timeout, myService) {
  		$scope.items = myService.localStorageGet(Key);
  	};
 
-<<<<<<< HEAD
   $scope.items = myService.localStorageGet(Key);
-=======
- 	$scope.localStorageSet = function(Key, tasks) { // Сохранение задачи в  локальное хранилище
- 		var Val = [];
- 		if(tasks.length > 0){ // Если список задачи не пуст, тогда просто обновялем информацию
- 			Val = tasks;
- 			localStorageService.set(Key, Val);
- 		}else{ 								// Если список задачи пуст, тогда пушим.
- 			Val.push(tasks);
- 			localStorageService.set(Key, Val);
- 		}
-
- 		$scope.localStorageGet(Key);  
- 	};
-
- 	$scope.localStorageGet = function(Key) { // Выгурузка задачи с локального хранилища
-  	$scope.items = localStorageService.get(Key);
-  	console.log('localStorageGet ' + $scope.items);
-  	return $scope.items;
-  }
-
-  $scope.localStorageGet(Key);
-
->>>>>>> 1b732a076399bc66f2224760c640989bc304a49b
 });
  
 </script>
