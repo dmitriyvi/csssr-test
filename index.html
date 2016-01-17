@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8"> 
+	<title>Document</title>
+
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+
+	<!-- scripts -->
+	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+	<script src="dist/angular-local-storage.js"></script>
+	<!-- scripts end -->
+
+</head>
+<body>
+<style>
+  ul {
+  	padding:0;
+  }
+ 	ul li {
+ 		list-style: none;
+ 		padding-bottom: 10px;
+ 		padding-top: 10px;
+ 	}
+</style>
+
+<script>
+
+var app = angular.module("myApp", ['LocalStorageModule']);
+
+app.controller("myCtrl", function($scope, $interval, $timeout, localStorageService) {
+ 	Key = 'items'; // Ключ в локальном хранилище
+ 	$scope.tasks = [];
+ 	$scope.items = [];
+ 	$scope.timeOnTimer = '00:00:00';
+ 	$scope.timeOnTimerSum = '00:00:00';
+
+ 	$scope.addNewTask = function(task) { // Добавление новой задачи
+ 		if(!task){
+	 		var taskName = ' ';
+	 		var money = 0;
+	 	}else{
+	 		var taskName = task.name;
+	 		var money = task.money;
+	 	}
+ 		
+ 		$scope.tasks = {
+	 		'timeAll' : $scope.timeOnTimerSum,
+	 		'moneyAll' : 0,
+	 		'task' : {
+	 			'name': taskName,
+	 			'money': money
+ 			}
+ 		}
+
+ 		$scope.localStorageSet(Key, $scope.tasks);
+ 	};
+
+ 	$scope.startTimeCounter = function() { // Запуск счетчика времени
+ 		$scope.startSwitch = true;
+
+		var timer = 0;
+		var hour = 0;
+		var minute = 0;
+		var second = 0;
+		var incrementCounter = $interval( function() {
+		  ++timer;
+		  hour   = Math.floor(timer / 3600);
+		  minute = Math.floor((timer - hour * 3600) / 60);
+		  second = timer - hour * 3600 - minute * 60;
+		  if (hour < 10) hour = '0' + hour;
+		  if (minute < 10) minute = '0' + minute;
+		  if (second < 10) second = '0' + second;
+		  $scope.timeOnTimer = hour + ':' + minute + ':' + second;
+		}, 1000);
+
+		$scope.stopTimeCounter = function() { // Остановка счетчика времени
+			$interval.cancel(incrementCounter);
+			$scope.summTime($scope.timeOnTimer);
+			$scope.startSwitch = false;
+
+			var items = $scope.items;
+			var timeAll = $scope.timeOnTimerSum;
+			var moneyAll = $scope.getAllMoneySumm();
+
+			for (var i = 0; i < items.length; i++) {
+				item = items[i]; 
+				item.timeAll = timeAll;
+				item.moneyAll = moneyAll;
+			};
+			$scope.localStorageSet(Key, $scope.items);
+		};
+
+ 	};
+
+ 	$scope.summTime = function(time) { // Суммирование времени потраченого сейчас с временем потраченым до.
+ 		var sumTime = $scope.timeOnTimerSum.split(/:/);
+ 		var newTime = time.split(/:/);
+
+		var hour = parseInt(sumTime[0])+parseInt(newTime[0]);
+		var minute = parseInt(sumTime[1])+parseInt(newTime[1]);
+		var second = parseInt(sumTime[2])+parseInt(newTime[2]);
+
+		var timer = (hour * 3600) + (minute * 60) + second;
+
+	  hour   = Math.floor(timer / 3600);
+	  minute = Math.floor((timer - hour * 3600) / 60);
+	  second = timer - hour * 3600 - minute * 60;
+	  if (hour < 10) hour = '0' + hour;
+	  if (minute < 10) minute = '0' + minute;
+	  if (second < 10) second = '0' + second;
+
+		$scope.timeOnTimerSum = hour + ':' + minute + ':' + second;
+ 	}; 
+
+ 	$scope.getAllMoneySumm = function() { // Получить сумму денег полученую за отработаное время
+ 		var moneyInHour = $scope.items[0].task.money;
+ 		var sumTime = $scope.timeOnTimerSum.split(/:/);
+ 		var summAll = (parseInt(sumTime[0]) * parseInt(moneyInHour)) + (parseInt(moneyInHour) / 60 * parseInt(sumTime[1]));
+ 		return summAll.toFixed(2);
+ 	};
+
+ 	$scope.changeTask = function(item) { // Редактирование поставленной задачи
+ 		$scope.localStorageSet(Key, item);
+ 	};
+
+ 	$scope.localStorageSet = function(Key, tasks) { // Сохранение задачи в  локальное хранилище
+ 		var Val = [];
+ 		if(tasks.length > 0){
+ 			Val = tasks;
+ 			localStorageService.set(Key, Val);
+ 		}else{
+ 			Val.push(tasks);
+ 			localStorageService.set(Key, Val);
+ 		}
+
+ 		$scope.localStorageGet(Key);
+ 	};
+
+ 	$scope.localStorageGet = function(Key) { // Выгурузка задачи с локального хранилища
+  	$scope.items = localStorageService.get(Key);
+  	console.log('localStorageGet ' + $scope.items);
+  	return $scope.items;
+  }
+
+  $scope.localStorageGet(Key);
+
+});
+ 
+</script>
+
+<div ng-app="myApp" ng-controller="myCtrl">
+
+	<div class="container">
+		<div class="row">
+			<div class="col-md-3 ">
+				<p class="lead">Add new Task!</p>
+	 			<div class="main-left-b">
+	 				<form class="form-horizontal">
+						  <div class="form-group">
+						    <label for="inputAddTask">Task:</label>
+					      <input type="text" class="form-control" id="inputAddTask" ng-model="task.name">
+						  </div>
+
+						  <div class="form-group">
+						    <label for="inputAddPay">Pay(in hour):</label>
+						    <div class="input-group">
+						      <input type="number" class="form-control" id="inputAddPay" ng-model="task.money">
+						      <div class="input-group-addon">RUB</div>
+						    </div>  
+						  </div>
+
+		 					<button type="button" class="btn btn-default" ng-click="addNewTask(task)">ADD</button>
+					</form>
+	 			</div>
+			</div>
+			
+			<div class="col-md-3"></div>
+
+			<div class="col-md-6 ">
+				<p class="lead">Task list</p>
+	 			<ul>
+	 				<li ng-show="!items">Task list is empty!</li>
+	 				<li ng-repeat="item in items"> 
+	 					<div> Task: <input  type="text" class="form-control" ng-show="change" ng-model="item.task.name"> <span ng-show="!change">{{item.task.name}}</span> </div>
+	 					<div> 
+	 						Time left: {{timeOnTimer}} 
+	 						<button type="button" class="btn btn-default" ng-disabled="startSwitch" ng-click="startTimeCounter()">Start</button> 
+	 						<button type="button" class="btn btn-default" ng-click="stopTimeCounter()">Stop</button>
+	 					</div>
+						<div> Pay:  <input type="number" class="form-control" ng-show="change" ng-model="item.task.money"> <span ng-show="!change">{{item.task.money}}</span> </div>
+						<div>All time: {{item.timeAll}}</div>
+						<div>All money: {{item.moneyAll}} rub.</div>
+						<button type="button" class="btn btn-default" ng-show="!change" ng-click="change = true">Change Task</button>
+						<button type="button" class="btn btn-default" ng-show="change" ng-click="changeTask(item)">Change</button>
+	 				</li> 
+	 			</ul>
+	 
+			</div> 
+		</div>	
+	</div><!-- container -->
+	
+</div><!-- MyApp -->
+
+
+</body>
+</html>
