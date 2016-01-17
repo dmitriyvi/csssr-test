@@ -57,6 +57,8 @@ app.controller("myCtrl", function($scope, $interval, $timeout, localStorageServi
  		}
 
  		$scope.localStorageSet(Key, $scope.tasks);
+ 		$scope.task = [];
+
  	};
 
  	$scope.startTimeCounter = function() { // Запуск счетчика времени
@@ -79,19 +81,19 @@ app.controller("myCtrl", function($scope, $interval, $timeout, localStorageServi
 
 		$scope.stopTimeCounter = function() { // Остановка счетчика времени
 			$interval.cancel(incrementCounter);
-			$scope.summTime($scope.timeOnTimer);
+			$scope.summTime($scope.timeOnTimer); // Получение "общего времени на выполнение задачи"
 			$scope.startSwitch = false;
 
 			var items = $scope.items;
 			var timeAll = $scope.timeOnTimerSum;
-			var moneyAll = $scope.getAllMoneySumm();
+			var moneyAll = $scope.getAllMoneySumm(); // Получение "суммы за время потраченное на выполнение задачи"
 
 			for (var i = 0; i < items.length; i++) {
 				item = items[i]; 
 				item.timeAll = timeAll;
 				item.moneyAll = moneyAll;
 			};
-			$scope.localStorageSet(Key, $scope.items);
+			$scope.localStorageSet(Key, $scope.items); // Сохранение результата
 
 			$scope.timeOnTimer = '00:00:00';
 		};
@@ -131,15 +133,15 @@ app.controller("myCtrl", function($scope, $interval, $timeout, localStorageServi
 
  	$scope.localStorageSet = function(Key, tasks) { // Сохранение задачи в  локальное хранилище
  		var Val = [];
- 		if(tasks.length > 0){
+ 		if(tasks.length > 0){ // Если список задачи не пуст, тогда просто обновялем информацию
  			Val = tasks;
  			localStorageService.set(Key, Val);
- 		}else{
+ 		}else{ 								// Если список задачи пуст, тогда пушим.
  			Val.push(tasks);
  			localStorageService.set(Key, Val);
  		}
 
- 		$scope.localStorageGet(Key);
+ 		$scope.localStorageGet(Key);  
  	};
 
  	$scope.localStorageGet = function(Key) { // Выгурузка задачи с локального хранилища
@@ -159,7 +161,7 @@ app.controller("myCtrl", function($scope, $interval, $timeout, localStorageServi
 	<div class="container">
 		<div class="row">
 			<div class="col-md-3 ">
-				<p class="lead">Add new Task!</p>
+				<p class="lead">Set Task!</p>
 	 			<div class="main-left-b">
 	 				<form class="form-horizontal">
 						  <div class="form-group">
@@ -183,7 +185,7 @@ app.controller("myCtrl", function($scope, $interval, $timeout, localStorageServi
 			<div class="col-md-3"></div>
 
 			<div class="col-md-6 ">
-				<p class="lead">Task list</p>
+				<p class="lead">Task info list</p>
 	 			<ul>
 	 				<li ng-show="!items">Task list is empty!</li>
 	 				<li ng-repeat="item in items"> 
