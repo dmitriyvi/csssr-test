@@ -23,7 +23,6 @@ var app = angular.module("myApp", ['LocalStorageModule']);
 
 ///////////////////////////////////////////SERVICE////////////////////////////////////////////////
 app.service('myService', function( localStorageService ){
-
 	var items = []; 
 
 	this.localStorageSet = function(Key, task) { // Сохранение задачи в  локальное хранилище
@@ -71,15 +70,9 @@ app.controller("myCtrl", function($scope, $interval, $timeout, myService) {
  			}
  		}
 
-<<<<<<< HEAD
  		myService.localStorageSet(Key, $scope.items);
  		$scope.items = myService.localStorageGet(Key);
  		$scope.task = []; // Очищаем форму постановки задачи
-=======
- 		$scope.localStorageSet(Key, $scope.tasks);
- 		$scope.task = [];
-
->>>>>>> 1b732a076399bc66f2224760c640989bc304a49b
  	};
 
  	$scope.startTimeCounter = function() { // Запуск счетчика времени
@@ -102,7 +95,7 @@ app.controller("myCtrl", function($scope, $interval, $timeout, myService) {
 
 		$scope.stopTimeCounter = function() { // Остановка счетчика времени
 			$interval.cancel(incrementCounter);
-			$scope.summTime($scope.timeOnTimer); // Получение "общего времени на выполнение задачи"
+			$scope.getSummTime($scope.timeOnTimer); // Получение "общего времени на выполнение задачи"
 			$scope.startSwitch = false;
 
 			var items = $scope.items;
@@ -114,19 +107,22 @@ app.controller("myCtrl", function($scope, $interval, $timeout, myService) {
 				item.timeAll = timeAll;
 				item.moneyAll = moneyAll;
 			};
-<<<<<<< HEAD
 			myService.localStorageSet(Key, $scope.items); // Сохранение результата
-=======
-			$scope.localStorageSet(Key, $scope.items); // Сохранение результата
->>>>>>> 1b732a076399bc66f2224760c640989bc304a49b
 
 			$scope.timeOnTimer = '00:00:00';
 		};
 
  	};
 
- 	$scope.summTime = function(time) { // Суммирование времени потраченого сейчас с временем потраченым до.
- 		var sumTime = $scope.timeOnTimerSum.split(/:/);
+ 	$scope.getSummTime = function(time) { // Суммирование времени потраченого сейчас с временем потраченым до.
+ 		var items = $scope.items;
+ 		var sumTime = '';
+ 		if(items){
+ 			sumTime = $scope.items[0].timeAll.split(/:/);
+ 		}else{
+ 			$scope.timeOnTimerSum.split(/:/);
+ 		}
+
  		var newTime = time.split(/:/);
 
 		var hour = parseInt(sumTime[0])+parseInt(newTime[0]);
@@ -157,31 +153,7 @@ app.controller("myCtrl", function($scope, $interval, $timeout, myService) {
  		$scope.items = myService.localStorageGet(Key);
  	};
 
-<<<<<<< HEAD
   $scope.items = myService.localStorageGet(Key);
-=======
- 	$scope.localStorageSet = function(Key, tasks) { // Сохранение задачи в  локальное хранилище
- 		var Val = [];
- 		if(tasks.length > 0){ // Если список задачи не пуст, тогда просто обновялем информацию
- 			Val = tasks;
- 			localStorageService.set(Key, Val);
- 		}else{ 								// Если список задачи пуст, тогда пушим.
- 			Val.push(tasks);
- 			localStorageService.set(Key, Val);
- 		}
-
- 		$scope.localStorageGet(Key);  
- 	};
-
- 	$scope.localStorageGet = function(Key) { // Выгурузка задачи с локального хранилища
-  	$scope.items = localStorageService.get(Key);
-  	console.log('localStorageGet ' + $scope.items);
-  	return $scope.items;
-  }
-
-  $scope.localStorageGet(Key);
-
->>>>>>> 1b732a076399bc66f2224760c640989bc304a49b
 });
  
 </script>
@@ -217,7 +189,7 @@ app.controller("myCtrl", function($scope, $interval, $timeout, myService) {
 			<div class="col-md-6 ">
 				<p class="lead">Task info list</p>
 	 			<ul>
-	 				<li ng-show="!items">Task list is empty!</li>
+	 				<li ng-show="!items" class="alert alert-info" role="alert">Task info list is empty!</li>
 	 				<li ng-repeat="item in items"> 
 	 					<div> Task: <input  type="text" class="form-control" ng-show="change" ng-model="item.task.name"> <span ng-show="!change">{{item.task.name}}</span> </div>
 	 					<div> 
