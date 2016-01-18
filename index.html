@@ -24,7 +24,7 @@ var app = angular.module("myApp", ['LocalStorageModule']);
 ///////////////////////////////////////////SERVICE////////////////////////////////////////////////
 app.service('myService', function( localStorageService ){
 	var items = [],
-	    timeLast = '';
+			timeLast = '';
 
 	// Сохранение задачи в  локальное хранилище
 	this.localStorageSetTask = function(Key, task) { 
@@ -48,7 +48,7 @@ app.service('myService', function( localStorageService ){
   	return items;
   }
 
-  	// Сохранение последнего значения со счетчика времени в локальное хранилище
+  // Сохранение последнего значения со счетчика времени в локальное хранилище
 	this.localStorageSetLastTime = function(Key, time) { 
  		var Val = [];
 
@@ -95,10 +95,10 @@ app.controller("myCtrl", function($scope, $interval, $timeout, myService) {
  	$scope.addNewTask = function(task) { 
  		if(!task){  
 	 		var taskName = ' ',
- 			    money = 0;
+	 				money = 0;
 	 	}else{			
 	 		var taskName = task.name,
- 		  	    money = task.money;
+	 				money = task.money;
 	 	}
  		
  		$scope.items = {
@@ -119,27 +119,28 @@ app.controller("myCtrl", function($scope, $interval, $timeout, myService) {
 
  	// Запуск счетчика времени
  	$scope.startTimeCounter = function() { 
-		var timer = 0, 
-		    hour = 0,
-		    minute = 0,
-		    second = 0,
-		    timeLast = $scope.timeOnTimer;
+
+		var	timer = 0, 
+				hour = 0,
+				minute = 0,
+				second = 0,
+				timeLast = $scope.timeOnTimer;
 
 		// Условие: если в локальном хранилище уже есть прежнее значение, то берем его и пересчитываем в секунды.
 		if(timeLast != '00:00:00') {
 			console.log('timeLast:::' + timeLast);
 			var time = timeLast.split(/:/),
-			    hourLast = parseInt(time[0]),
-			    minuteLast = parseInt(time[1]),
-			    secondLast = parseInt(time[2]);
-			    timer = (hourLast * 3600) + (minuteLast * 60) + secondLast;
+					hourLast = parseInt(time[0]),
+					minuteLast = parseInt(time[1]),
+					secondLast = parseInt(time[2]);
+					timer = (hourLast * 3600) + (minuteLast * 60) + secondLast;
 		}
 
 
 		// Делаем кнопку "Start" недоступной
  		$scope.startSwitch = true;
 
-		var incrementCounter = $interval( function() {
+		$scope.incrementCounter = $interval( function() {
 		  ++timer;
 		  hour   = Math.floor(timer / 3600);
 		  minute = Math.floor((timer - hour * 3600) / 60);
@@ -153,51 +154,61 @@ app.controller("myCtrl", function($scope, $interval, $timeout, myService) {
 		  myService.localStorageSetLastTime(KeyTimeLast, $scope.timeOnTimer);
 		}, 1000);
 
-		// Остановка счетчика времени
-		$scope.stopTimeCounter = function() { 
-			$interval.cancel(incrementCounter);
+ 	};
 
-			// Получение "общего времени на выполнение задачи"
-			$scope.getSummTime($scope.timeOnTimer); 
-			$scope.startSwitch = false;
 
-			var items = $scope.items,
-			    timeAll = $scope.timeOnTimerSum,
+	// Остановка счетчика времени
+	$scope.stopTimeCounter = function() { 
 
-			// Получение "суммы за время потраченное на выполнение задачи"
-			moneyAll = $scope.getAllMoneySumm(); 
+		if (angular.isDefined($scope.incrementCounter)) {
+      $interval.cancel($scope.incrementCounter);
+    }
 
-			for (var i = 0; i < items.length; i++) {
-				item = items[i]; 
-				item.timeAll = timeAll;
-				item.moneyAll = moneyAll;
-			};
+		// Получение "общего времени на выполнение задачи"
+		$scope.getSummTime($scope.timeOnTimer); 
+		$scope.startSwitch = false;
 
-			// Сохранение результата
-			myService.localStorageSetTask(KeyItems, $scope.items); 
+		var items = $scope.items,
+				timeAll = $scope.timeOnTimerSum,
 
-			$scope.timeOnTimer = '00:00:00';
+		// Получение "суммы за время потраченное на выполнение задачи"
+				moneyAll = $scope.getAllMoneySumm(); 
+
+		for (var i = 0; i < items.length; i++) {
+			item = items[i]; 
+			item.timeAll = timeAll;
+			item.moneyAll = moneyAll;
 		};
 
- 	};
+		// Сохранение результата
+		myService.localStorageSetTask(KeyItems, $scope.items); 
+
+		// Обнуляем последнее значение счетчика
+		$scope.timeOnTimer = '00:00:00';
+	 	myService.localStorageSetLastTime(KeyTimeLast, $scope.timeOnTimer);	
+	};
+
+ 	$scope.$on('$destroy', function() {
+    $scope.stopTimeCounter();
+  });
+
 
  	// Суммирование времени потраченого сейчас с временем потраченым до.
  	$scope.getSummTime = function(time) { 
  		var items = $scope.items,
- 		    sumTime = '';
+ 				sumTime = '';
 
- 		if(items){
- 			sumTime = $scope.items[0].timeAll.split(/:/);
- 		}else{
- 			$scope.timeOnTimerSum.split(/:/);
- 		}
+ 		// Получаем и режем на "часы", "минуты", "секунды" значение общего времени с локального хранилища 
+ 		sumTime = $scope.items[0].timeAll.split(/:/);
 
+ 		// Режем полученное время с счетчика времени
  		var newTime = time.split(/:/),
-        	    hour = parseInt(sumTime[0])+parseInt(newTime[0]),
-		    minute = parseInt(sumTime[1])+parseInt(newTime[1]),
-		    second = parseInt(sumTime[2])+parseInt(newTime[2]),
 
-		    timer = (hour * 3600) + (minute * 60) + second;
+				hour = parseInt(sumTime[0])+parseInt(newTime[0]),
+				minute = parseInt(sumTime[1])+parseInt(newTime[1]),
+				second = parseInt(sumTime[2])+parseInt(newTime[2]),
+
+				timer = (hour * 3600) + (minute * 60) + second;
 
 	  hour   = Math.floor(timer / 3600);
 	  minute = Math.floor((timer - hour * 3600) / 60);
@@ -211,9 +222,18 @@ app.controller("myCtrl", function($scope, $interval, $timeout, myService) {
 
  	// Получить сумму денег полученую за отработаное время
  	$scope.getAllMoneySumm = function() { 
+
+ 				// Получаем оплату в час
  		var moneyInHour = $scope.items[0].task.money,
- 		    sumTime = $scope.timeOnTimerSum.split(/:/),
- 		    summAll = (parseInt(sumTime[0]) * parseInt(moneyInHour)) + (parseInt(moneyInHour) / 60 * parseInt(sumTime[1]));
+
+ 				// Получаем значение общего времени с локального хранилища 
+ 				sumTime = $scope.timeOnTimerSum.split(/:/),
+
+ 				/**
+ 				 * Высчитываем полученную сумму  по формулее: 
+ 				 * (сумма за час * отработаные часы) + (суммы за час / кол-во минут в часе * отработаные минуты)
+ 				 */
+ 				summAll = (parseInt(sumTime[0]) * parseInt(moneyInHour)) + (parseInt(moneyInHour) / 60 * parseInt(sumTime[1]));
  		return summAll.toFixed(2);
  	};
 
