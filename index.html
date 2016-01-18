@@ -202,13 +202,13 @@ app.controller("myCtrl", function($scope, $interval, $timeout, myService) {
 		    minute = parseInt(sumTime[1])+parseInt(newTime[1]),
 		    second = parseInt(sumTime[2])+parseInt(newTime[2]),
 		    timer = (hour * 3600) + (minute * 60) + second;
-
-	  hour   = Math.floor(timer / 3600);
-	  minute = Math.floor((timer - hour * 3600) / 60);
-	  second = timer - hour * 3600 - minute * 60;
-	  if (hour < 10) hour = '0' + hour;
-	  if (minute < 10) minute = '0' + minute;
-	  if (second < 10) second = '0' + second;
+		
+		hour   = Math.floor(timer / 3600);
+		minute = Math.floor((timer - hour * 3600) / 60);
+		second = timer - hour * 3600 - minute * 60;
+		if (hour < 10) hour = '0' + hour;
+		if (minute < 10) minute = '0' + minute;
+		if (second < 10) second = '0' + second;
 
 		$scope.timeOnTimerSum = hour + ':' + minute + ':' + second;
  	}; 
