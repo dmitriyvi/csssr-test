@@ -44,9 +44,9 @@ app.service('myService', function( localStorageService ){
 
  	// Выгурузка задачи с локального хранилища
  	this.localStorageGetTask = function(Key) { 
-  	items = localStorageService.get(Key);
-  	return items;
-  }
+  		items = localStorageService.get(Key);
+  		return items;
+  	}
 
         // Сохранение последнего значения со счетчика времени в локальное хранилище
 	this.localStorageSetLastTime = function(Key, time) { 
@@ -65,9 +65,9 @@ app.service('myService', function( localStorageService ){
 
  	// Выгрузка последнего значения со счетчика времени с локального хранилища
  	this.localStorageGetLastTime = function(Key) { 
-  	timeLast = localStorageService.get(Key);
-  	return timeLast;
-  }
+  		timeLast = localStorageService.get(Key);
+  		return timeLast;
+  	}
 
 });
 
