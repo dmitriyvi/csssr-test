@@ -161,8 +161,8 @@ app.controller("myCtrl", function($scope, $interval, $timeout, myService) {
 	$scope.stopTimeCounter = function() { 
 
 		if (angular.isDefined($scope.incrementCounter)) {
-      $interval.cancel($scope.incrementCounter);
-    }
+      			$interval.cancel($scope.incrementCounter);
+    		}
 
 		// Получение "общего времени на выполнение задачи"
 		$scope.getSummTime($scope.timeOnTimer); 
@@ -187,11 +187,6 @@ app.controller("myCtrl", function($scope, $interval, $timeout, myService) {
 		$scope.timeOnTimer = '00:00:00';
 	 	myService.localStorageSetLastTime(KeyTimeLast, $scope.timeOnTimer);	
 	};
-
- 	$scope.$on('$destroy', function() {
-    $scope.stopTimeCounter();
-  });
-
 
  	// Суммирование времени потраченого сейчас с временем потраченым до.
  	$scope.getSummTime = function(time) { 
