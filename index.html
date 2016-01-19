@@ -128,7 +128,6 @@ app.controller("myCtrl", function($scope, $interval, $timeout, myService) {
 
 		// Условие: если в локальном хранилище уже есть прежнее значение, то берем его и пересчитываем в секунды.
 		if(timeLast != '00:00:00') {
-			console.log('timeLast:::' + timeLast);
 			var time = timeLast.split(/:/),
 			    hourLast = parseInt(time[0]),
 			    minuteLast = parseInt(time[1]),
